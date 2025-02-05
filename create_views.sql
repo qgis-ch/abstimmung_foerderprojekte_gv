@@ -36,7 +36,8 @@ CREATE VIEW gv2025.projekte AS (
             ( 9 , 'QGIS Processing Graphical Modeller improvements', 23500 ),
             ( 10 , 'QField swisslocator plugin', 4700 ),
             ( 11 , 'Improvements to attribute form designer', 17200 ),
-            ( 12 , 'Improvements to Swiss Locator Plugin', 12500 )
+            ( 12 , 'Improvements to Swiss Locator Plugin', 12500 ),
+            ( 13 , 'Fixed scale for layout elevation plots', 2710 )
     )
     AS t (projekt_id, beschreibung, preis_in_chf)
 );
@@ -78,6 +79,7 @@ CREATE VIEW gv2025.resultate_gewichtet AS (
         rf.projekt_wahl_1,
         rf.projekt_wahl_2,
         rf.projekt_wahl_3,
+        rf.projekt_wahl_4,
         ml.kategorie,
         gk.gewicht AS kategorie_gewicht,
         CASE WHEN rf.projekt_wahl_1 = 1 THEN gk.gewicht
@@ -149,9 +151,15 @@ CREATE VIEW gv2025.resultate_gewichtet AS (
         CASE WHEN rf.projekt_wahl_1 = 12 THEN gk.gewicht
             WHEN rf.projekt_wahl_2 = 12 THEN gk.gewicht
             WHEN rf.projekt_wahl_3 = 12 THEN gk.gewicht
-            WHEN rf.projekt_wahl_4 = 12THEN gk.gewicht
+            WHEN rf.projekt_wahl_4 = 12 THEN gk.gewicht
             ELSE 0::integer
-        END AS projekt_12_stimme
+        END AS projekt_12_stimme,
+        CASE WHEN rf.projekt_wahl_1 = 13 THEN gk.gewicht
+            WHEN rf.projekt_wahl_2 = 13 THEN gk.gewicht
+            WHEN rf.projekt_wahl_3 = 13 THEN gk.gewicht
+            WHEN rf.projekt_wahl_4 = 13 THEN gk.gewicht
+            ELSE 0::integer
+        END AS projekt_13_stimme
     FROM
         gv2025.resultate_formatiert rf 
     JOIN
@@ -241,6 +249,12 @@ CREATE VIEW gv2025.resultate_nach_projekt AS (
             SELECT
             12::integer AS projekt,
             SUM(projekt_12_stimme) AS anzahl_stimmen
+        FROM
+            gv2025.resultate_gewichtet rg
+        UNION
+            SELECT
+            13::integer AS projekt,
+            SUM(projekt_13_stimme) AS anzahl_stimmen
         FROM
             gv2025.resultate_gewichtet rg
     )
